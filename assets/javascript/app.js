@@ -21,7 +21,8 @@ $(document).ready(function () {
     $('#startTrainTime').val(localTime.format("HH:mm"));
 
 
-    // initialize Fields for Datepicker JS
+    // initialize Fields for Datepicker library found on web
+    // https://gijgo.com/datepicker/example/bootstrap-4
     $("#startTrainDate").datepicker({uiLibrary: 'bootstrap4'});  // this is to add a train
     $("#updateTrainDate").datepicker({uiLibrary: 'bootstrap4'});  // this is to update an existing train
 
@@ -89,9 +90,9 @@ $(document).ready(function () {
         var dateTimeString = updateTrainDate + " " + updateTrainTime;
 
         // use moment to transform it to epoch Time (secs) for storage
-        var updateStartEpoch = moment(dateTimeString, "MM/DD/YYYY HH:mm").format("X");
+        var updateStartEpochObj = moment(dateTimeString, "MM/DD/YYYY HH:mm");
+        var updateStartEpoch = updateStartEpochObj.format("X");
         console.log("Any Luckwith update?", dateTimeString, updateStartEpoch);
-
 
         // place values into Object
         var updatedInfo = {
@@ -111,7 +112,7 @@ $(document).ready(function () {
 
         // hide modal after 1 second of displaying success!
         var temp = setTimeout(function(){
-            $('#updateTrainPrompt').modal('toggle');
+            $('#updateTrainPrompt').modal('hide');
             console.log("I tried to toggle!");
         }, 2000);
     });
