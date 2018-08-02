@@ -176,7 +176,7 @@ $(document).ready(function () {
     }, 60000)
 
 
-    // function to update table, called by 60 second timer
+    // function to update table, called by 60 second timer, child removed, child changed handler
     function updateTable(snapshotObj) {
         // clear tbody
         $("#trainSchedule > tbody").empty();
@@ -216,7 +216,7 @@ $(document).ready(function () {
         });
     })
 
-    // Database child changed handler, redraw table when child is removed from DB
+    // Database child changed handler, redraw table when child is updated/changed
     database.ref().on("child_changed", function () {
         database.ref().on("value", function (snapshot) {
             trainObj = snapshot.val();
