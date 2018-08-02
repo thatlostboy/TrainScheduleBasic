@@ -19,8 +19,16 @@ $(document).ready(function () {
     var database = firebase.database();
 
 
-    // initialize Time
-    $("#currentTime").text(moment().format("hh:mm A"));
+    // initialize Time for banner, add train, and modals.  
+    localTime = moment();
+    $("#currentTime").text(localTime.format("MM/DD/YYYY hh:mm A"));
+    $('#startTrainDate').val(localTime.format("MM/DD/YYYY"));
+    $('#startTrainTime').val(localTime.format("HH:mm"));
+
+
+    // initialize Fields for Datepicker JS
+    $("#startTrainDate").datepicker();
+    $("#updateTrainDate").datepicker();
 
 
 
@@ -32,20 +40,26 @@ $(document).ready(function () {
         // load values of object key from database and prefill modal form
         database.ref(dbkey).on("value", function (snapshot) {
 
+            // empty previous modal message 
+            $('.updateMsg').empty();
+
             // load database
             updateValObj = snapshot.val();
             console.log("updateObj: ", updateValObj);
 
             // pretty display for trainStartTime, stored in epoch time (secs)
-            trainStartDisp = moment(updateValObj.trainStartDB, "X").format("HH:mm");
+            let trainStartDisp = moment(updateValObj.trainStartDB, "X").format("HH:mm");
             console.log(updateValObj.trainStartDB, trainStartDisp);
-
+            let trainStartTimeDisp = moment(updateValObj.trainStartDB, "X").format("HH:mm");
+            let trainStartDateDisp = moment(updateValObj.trainStartDB, "X").format("MM/DD/YYYY");
 
             // prepopulate values
             $("#updateDBID").val(dbkey);
             $("#updateName").val(updateValObj.trainNameDB);
             $("#updateDestn").val(updateValObj.trainDestnDB);
-            $("#updateStart").val(trainStartDisp);
+            // $("#updateStart").val(trainStartDisp);
+            $("#updateTrainDate").val(trainStartDateDisp);
+            $("#updateTrainTime").val(trainStartTimeDisp);
             $("#updateFrequency").val(updateValObj.trainFrequencyDB);
             $("#updateTrainBTN").removeAttr("disabled");  // in case it was disabled before
 
@@ -63,7 +77,6 @@ $(document).ready(function () {
     // click handler to update values
     $("body").on("click", "#updateTrainBTN", function () {
         // disable button
-        console.log("I got clicked!! ");
         $("#updateTrainBTN").attr("disabled", "disabled");
 
         // grab text info
@@ -73,8 +86,17 @@ $(document).ready(function () {
         var updateStart = $("#updateStart").val();
         var updateFrequency = $("#updateFrequency").val();
 
-        // convert date to Epoch format for storage
-        var updateStartEpoch = moment(updateStart, "HH:mm").format("X");
+        // grab date time test strings
+        var updateTrainDate = $('#updateTrainDate').val().trim();
+        var updateTrainTime = $('#updateTrainTime').val().trim();
+
+        // combine strings to nicer format
+        var dateTimeString = updateTrainDate + " " + updateTrainTime;
+
+        // use moment to transform it to epoch Time (secs) for storage
+        var updateStartEpoch = moment(dateTimeString, "MM/DD/YYYY HH:mm").format("X");
+        console.log("Any Luckwith update?", dateTimeString, updateStartEpoch);
+
 
         // place values into Object
         var updatedInfo = {
@@ -89,7 +111,14 @@ $(document).ready(function () {
         database.ref(dbid).update(updatedInfo);
 
         // print success
-        console.log("where am I???????????????????????");
+        $('.updateMsg').html("<p class='text-success'>Successfully Updated!!!");
+        console.log("--------->success with updating!");
+
+        // hide modal after 1 second of displaying success!
+        var temp = setTimeout(function(){
+            $('#updateTrainPrompt').modal('toggle');
+            console.log("I tried to toggle!");
+        }, 2000);
     });
 
 
@@ -101,12 +130,22 @@ $(document).ready(function () {
         newTrain = {
             trainNameDB: $("#trainName").val().trim(),
             trainDestnDB: $("#trainDestn").val().trim(),
-            trainStartDB: $("#trainStart").val().trim(),
+            trainStartDB: "",
             trainFrequencyDB: $("#trainFrequency").val().trim()
         }
+        console.log("----->> add train handler?")
 
-        // translate to epochTime
-        var epochTime = moment(newTrain.trainStartDB, "HH:mm").format("X");
+        // grab date time test strings
+        var startTrainDate = $('#startTrainDate').val().trim();
+        var startTrainTime = $('#startTrainTime').val().trim();
+
+        // combine strings to nicer format
+        var dateTimeString = startTrainDate + " " + startTrainTime;
+
+        // use moment to transform it to epoch Time (secs) for storage
+        var epochTime = moment(dateTimeString, "MM/DD/YYYY HH:mm").format("X");
+        console.log("Any Luck?", dateTimeString, epochTime);
+
 
         // update vaue to epochTime
         newTrain['trainStartDB'] = epochTime;
@@ -181,6 +220,16 @@ $(document).ready(function () {
         });
     })
 
+    // Database child changed handler, redraw table when child is removed from DB
+    database.ref().on("child_changed", function () {
+        database.ref().on("value", function (snapshot) {
+            trainObj = snapshot.val();
+            updateTable(trainObj);
+        }, function (errorObject) {
+            console.log("The read failed: " + errorObject.code);
+        });
+    })
+
 
 
     // Database child added handler, add table row for every new addition detected
@@ -217,7 +266,8 @@ $(document).ready(function () {
     })
 
 
-    // update rows to Table, honoring the DRY principle
+    // update rows to Table, honoring the DRY principle, almost everything will call this part to update the table 
+    // rows 
     function updateRows(trainData) {
         // extract values
         var name = trainData.trainNameDB;
@@ -231,34 +281,35 @@ $(document).ready(function () {
         // fancy math stuff
         //////////////
         // use moment to convert starttime and currentTime to epoch format in secons
-        // so it's easier to calculate
+        // so it's easier to calculate 
         var startTime = parseInt(start);
         var currentTime = parseInt(moment().format("X"));
 
-        // do rest of calculations using integer math
+        // do rest of calculations using integer math (seconds)
         // formula is ( currentTime - starttime ) % freq = remainder 
         var testTime = (currentTime - startTime) % (parseInt(freq) * 60);
-        var secsSoFar = 0;
+        var secsSoFar = 0;   // initialize secs to wait for next train
+        var minsAway = 0;  // initialize mins away
+        var nextArrival = 0;  // initailize nextArrival
 
-        // if start time < current time of day.  assuem we are referring to the train schedule that started yesterday
-        // eg. if start time is 12:50PM   and current time is 11:30AM, that means that current time is 11:30AM 8/1 and
-        //  and the start time is day before 7/31 at 12:50PM.  so one day = 86400 seconds
-
+        // if start time < current time of day.  then train hasn't started to run yet,
+        //  so secsSoFar 
         if (testTime < 0) {
-            secsSoFar = (currentTime - startTime + 86400) % (parseInt(freq) * 60);
+            secsSoFar = startTime - currentTime; // if train hasn't started yet, then wait for train to start running
+            console.log(name, " calculated: ", secsSoFar);
+            minsAway = parseInt(secsSoFar / 60); // change from floating to integer
+            nextArrival = startTime;  /// arrival Time is the start time
         } else {
-            secsSoFar = testTime;
+            secsSoFar = testTime;  // otherwise start Time is accurate
+
+            // minutes away = frequency - reminder (1 min = 60 secods)
+            secsAway = parseInt(freq) * 60 - secsSoFar;
+            minsAway = parseInt(secsAway / 60);  // this will change from floating to integer
+
+            // Next Arrival = currentTime + seconds away
+            nextArrival = currentTime + secsAway;  // this is in epoch
+
         }
-
-        // minutes away = frequency - reminder (1 min = 60 secods)
-        var secsAway = parseInt(freq) * 60 - secsSoFar;
-        var minsAway = parseInt(secsAway / 60);  // this will change from floating to integer
-
-        //console.log("minutes away: ", minsAway);
-
-        // Next Arrival = currentTime + seconds away
-        var nextArrival = currentTime + secsAway;  // this is in epoch
-
 
         //console.log("Current Time: ", currentTime);
 

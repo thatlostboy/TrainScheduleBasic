@@ -19,8 +19,16 @@ $(document).ready(function () {
     var database = firebase.database();
 
 
-    // initialize Time
-    $("#currentTime").text(moment().format("hh:mm A"));
+    // initialize Time for banner, add train, and modals.  
+    localTime = moment();
+    $("#currentTime").text(localTime.format("hh:mm A"));
+    $('#startTrainDate').val(localTime.format("MM/DD/YYYY"));
+    $('#startTrainTime').val(localTime.format("HH:mm"));
+    
+
+    // initialize Fields for Datepicker JS
+    $("#startTrainDate").datepicker();
+    $("#updateTrainDate").datepicker();
 
 
 
@@ -37,15 +45,18 @@ $(document).ready(function () {
             console.log("updateObj: ", updateValObj);
 
             // pretty display for trainStartTime, stored in epoch time (secs)
-            trainStartDisp = moment(updateValObj.trainStartDB, "X").format("HH:mm");
+            let trainStartDisp = moment(updateValObj.trainStartDB, "X").format("HH:mm");
             console.log(updateValObj.trainStartDB, trainStartDisp);
-
+            let trainStartTimeDisp = moment(updateValObj.trainStartDB, "X").format("HH:mm");
+            let trainStartDateDisp = moment(updateValObj.trainStartDB, "X").format("MM/DD/YYYY");
 
             // prepopulate values
             $("#updateDBID").val(dbkey);
             $("#updateName").val(updateValObj.trainNameDB);
             $("#updateDestn").val(updateValObj.trainDestnDB);
-            $("#updateStart").val(trainStartDisp);
+            // $("#updateStart").val(trainStartDisp);
+            $("#updateTrainDate").val(trainStartDateDisp);
+            $("#updateTrainTime").val(trainStartTimeDisp);
             $("#updateFrequency").val(updateValObj.trainFrequencyDB);
             $("#updateTrainBTN").removeAttr("disabled");  // in case it was disabled before
 
@@ -73,8 +84,17 @@ $(document).ready(function () {
         var updateStart = $("#updateStart").val();
         var updateFrequency = $("#updateFrequency").val();
 
-        // convert date to Epoch format for storage
-        var updateStartEpoch = moment(updateStart, "HH:mm").format("X");
+        // grab date time test strings
+        var updateTrainDate = $('#updateTrainDate').val().trim();
+        var updateTrainTime = $('#updateTrainTime').val().trim();
+
+        // combine strings to nicer format
+        var dateTimeString = updateTrainDate + " " + updateTrainTime;
+
+        // use moment to transform it to epoch Time (secs) for storage
+        var updateStartEpoch = moment(dateTimeString,"MM/DD/YYYY HH:mm").format("X");
+        console.log("Any Luckwith update?", dateTimeString, updateStartEpoch);
+
 
         // place values into Object
         var updatedInfo = {
@@ -89,7 +109,7 @@ $(document).ready(function () {
         database.ref(dbid).update(updatedInfo);
 
         // print success
-        console.log("where am I???????????????????????");
+        console.log("--------->success with updating!");
     });
 
 
@@ -101,12 +121,22 @@ $(document).ready(function () {
         newTrain = {
             trainNameDB: $("#trainName").val().trim(),
             trainDestnDB: $("#trainDestn").val().trim(),
-            trainStartDB: $("#trainStart").val().trim(),
+            trainStartDB: "",
             trainFrequencyDB: $("#trainFrequency").val().trim()
         }
+        console.log("----->> add train handler?")
 
-        // translate to epochTime
-        var epochTime = moment(newTrain.trainStartDB, "HH:mm").format("X");
+        // grab date time test strings
+        var startTrainDate = $('#startTrainDate').val().trim();
+        var startTrainTime = $('#startTrainTime').val().trim();
+
+        // combine strings to nicer format
+        var dateTimeString = startTrainDate + " " + startTrainTime;
+
+        // use moment to transform it to epoch Time (secs) for storage
+        var epochTime = moment(dateTimeString,"MM/DD/YYYY HH:mm").format("X");
+        console.log("Any Luck?", dateTimeString, epochTime);
+
 
         // update vaue to epochTime
         newTrain['trainStartDB'] = epochTime;
