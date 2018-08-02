@@ -114,7 +114,7 @@ $(document).ready(function () {
         var temp = setTimeout(function(){
             $('#updateTrainPrompt').modal('hide');
             console.log("I tried to toggle!");
-        }, 2000);
+        }, 1000);
     });
 
 
