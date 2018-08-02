@@ -3,81 +3,7 @@
 $(document).ready(function () {
     console.log("ready!");
 
-    // Initialize Firebase
-    var config = {
-        apiKey: "AIzaSyCrBnxCgKz59rYQ4kBshrnsfJj7oGTU__c",
-        authDomain: "trainschedule-f9baf.firebaseapp.com",
-        databaseURL: "https://trainschedule-f9baf.firebaseio.com",
-        projectId: "trainschedule-f9baf",
-        storageBucket: "trainschedule-f9baf.appspot.com",
-        messagingSenderId: "231413435432"
-    };
-
-    firebase.initializeApp(config);
-    var database = firebase.database();
-
-
-    // initialize Time
-    $("#currentTime").text(moment().format("hh:mm A"));
-
-
-
-    // click handler to open Modal to updating Train
-    $("body").on("click", ".editTrain", function () {
-        let dbkey = $(this).attr("databaseid");
-        console.log("open modal for: ", dbkey);
-
-        // load values from database
-        database.ref().on("value", function (snapshot) {
-            // load database
-            trainObj = snapshot.val();
-
-            // load specific child
-            updateValObj = trainObj[dbkey];
-            console.log(updateValObj);
-
-            // pretty display for trainStartTime, stored in epoch time (secs)
-            trainStartDisp = moment(updateValObj.trainStartDB, "HH:mm");
-
-            // prepopulate values
-            $("#updateDBID").val(dbkey);
-            $("#updateName").val(updateValObj.trainNameDB);
-            $("#updateDestn").val(updateValObj.trainDestnDB);
-            $("#updateStart").val(updateValObj.trainStartDisp);
-            $("#updateFrequency").val(updateValObj.trainFrequencyDB);
-
-            // activate modal to s how
-            $("#updateTrainPrompt").modal("show");
-
-        }, function (errorObject) {
-            console.log("The read failed: " + errorObject.code);
-
-        });
-
-    });
-
-
-    // click handler to update values
-    $("body").on("click", "#updateTrainBTN", function () {
-        // disable button
-        console.log("I got clicked!! ")
-
-        // grab text info
-        var dbid = $("#updateDBID").val();
-        var updateName = $("#updateName").val();
-        var updateDestn = $("#updateDestn").val();
-        var updateStart = $("#updateStart").val();
-        var updateFrequency = $("#updateFrequency").val();
-
-        console.log(dbid, updateName, updateDestn, updateStart, updateFrequency);
-
-        // update the values
-
-        // print success
-    });
-
-
-    // click handler to add train
+    // click handler
     $("body").on("click", "#addTrainBtn", function () {
         // disable click while handling click event
         $("#addTrainBtn").attr("disabled", "disabled");
@@ -102,19 +28,9 @@ $(document).ready(function () {
         var newTrain = database.ref().push(newTrain);
     })
 
-
-    // click function to delete item
-    $("body").on("click", ".deleteTrain", function () {
-        let testid = $(this).attr("databaseid");
-        console.log(testid);
-        var remTrain = database.ref().child(testid).remove();
-    });
-
-
-
-    // 60 second interval Timer to update values
+    // 60 second Timer
     var clockTimer = setInterval(function () {
-        let curTime = moment().format("hh:mm A");
+        let curTime = moment().format("hh:mm:ss A");
         $("#currentTime").text(curTime);
         database.ref().on("value", function (snapshot) {
             trainObj = snapshot.val();
@@ -125,7 +41,7 @@ $(document).ready(function () {
     }, 60000)
 
 
-    // function to update table, called by 60 second timer
+    // function to update table
     function updateTable(snapshotObj) {
         // clear tbody
         $("#trainSchedule > tbody").empty();
@@ -136,15 +52,13 @@ $(document).ready(function () {
             var dest = snapshotObj[key].trainDestnDB;
             var freq = snapshotObj[key].trainFrequencyDB;
             var start = snapshotObj[key].trainStartDB;
-            var primKey = key;
 
             // newObject to pass to drawTable
             newObject = {
                 trainNameDB: name,
                 trainDestnDB: dest,
                 trainFrequencyDB: freq,
-                trainStartDB: start,
-                primKeyDB: primKey
+                trainStartDB: start
             }
 
             updateRows(newObject);
@@ -153,42 +67,39 @@ $(document).ready(function () {
         console.log("done!!");
 
     }
+    // Initialize Firebase
+    var config = {
+        apiKey: "AIzaSyCrBnxCgKz59rYQ4kBshrnsfJj7oGTU__c",
+        authDomain: "trainschedule-f9baf.firebaseapp.com",
+        databaseURL: "https://trainschedule-f9baf.firebaseio.com",
+        projectId: "trainschedule-f9baf",
+        storageBucket: "trainschedule-f9baf.appspot.com",
+        messagingSenderId: "231413435432"
+    };
+
+    firebase.initializeApp(config);
+    var database = firebase.database();
 
 
-    // Database child removed handler, redraw table when child is removed from DB
-    database.ref().on("child_removed", function () {
-        database.ref().on("value", function (snapshot) {
-            trainObj = snapshot.val();
-            updateTable(trainObj);
-        }, function (errorObject) {
-            console.log("The read failed: " + errorObject.code);
-        });
-    })
+    // initialize Time
+    $("#currentTime").text(moment().format("hh:mm:ss A"));
 
-
-
-    // Database child added handler, add table row for every new addition detected
+    // Database child handler, add row for every new addition detected
     database.ref().on("child_added", function (childSnapshot) {
-        console.log("snapshot", childSnapshot.val());
-
+        console.log(childSnapshot.val());
 
         // store values in varaibe
         var name = childSnapshot.val().trainNameDB;
         var dest = childSnapshot.val().trainDestnDB;
         var freq = childSnapshot.val().trainFrequencyDB;
         var start = childSnapshot.val().trainStartDB;
-        var primKey = childSnapshot.key;
-
-        // log key?
-        console.log("new key: ", name, " : ", childSnapshot.key);
 
         // newObject to pass to drawTable
         newObject = {
             trainNameDB: name,
             trainDestnDB: dest,
             trainFrequencyDB: freq,
-            trainStartDB: start,
-            primKeyDB: primKey
+            trainStartDB: start
         }
 
         // updateRows
@@ -201,16 +112,13 @@ $(document).ready(function () {
     })
 
 
-    // update rows to Table, honoring the DRY principle
+    // update rows to Table
     function updateRows(trainData) {
         // extract values
         var name = trainData.trainNameDB;
         var dest = trainData.trainDestnDB;
         var freq = trainData.trainFrequencyDB;
         var start = trainData.trainStartDB;
-        var primKey = trainData.primKeyDB;
-
-        console.log("updateRows: ", trainData);
         //////////////
         // fancy math stuff
         //////////////
@@ -251,26 +159,16 @@ $(document).ready(function () {
         var nextArrivalDisp = moment(nextArrival, "X").format("hh:mm A");
         //////////////////
 
-
-        // create icon for trash and associate key to it
-        var actionTD = $("<td>");
-        var trashHTML = '<i class="fas fa-trash-alt deleteTrain" databaseID = "' + primKey + '"></i>';
-
-        var editHTML = '<i class="fas fa-pencil-alt editTrain" databaseID = "' + primKey + '"></i>';
-        actionTD.html(trashHTML + editHTML);
-
         // mark red is arrival in less than 5 minutes
         if (minsAway < 5) {
             // Create the new row with new values. 
             var newRow = $("<tr>").append(
-                actionTD,
                 $("<td>").text(name).addClass("makeRed"),
                 $("<td>").text(dest).addClass("makeRed"),
                 $("<td>").text(freq).addClass("makeRed"),
                 $("<td>").text(nextArrivalDisp).addClass("makeRed"),
                 $("<td>").text(minsAway).addClass("makeRed"),
             );
-            newRow.addClass("selectRow");
 
             // add to existing tbody
             $("#trainSchedule > tbody").append(newRow);
@@ -279,14 +177,12 @@ $(document).ready(function () {
 
             // Create the new row with new values. 
             var newRow = $("<tr>").append(
-                actionTD,
                 $("<td>").text(name),
                 $("<td>").text(dest),
                 $("<td>").text(freq),
                 $("<td>").text(nextArrivalDisp),
                 $("<td>").text(minsAway)
             );
-            newRow.addClass("selectRow");
 
             // add to existing tbody
             $("#trainSchedule > tbody").append(newRow);

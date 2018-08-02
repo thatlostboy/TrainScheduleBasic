@@ -5,3 +5,24 @@
 #trainBanner {
     margin-top: 20px;
 }
+
+.makeRed {
+    color: red;
+}
+
+tbody > .selectRow:hover {
+    color: green;
+    border: 2px solid green;
+}
+
+.deleteTrain:hover {
+    color: red;
+}
+
+.editTrain {
+    margin-left: 20px;
+}
+
+.editTrain:hover {
+    color: blue;
+}
