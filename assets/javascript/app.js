@@ -1,9 +1,4 @@
-
-
 $(document).ready(function () {
-
-
-
 
     // Initialize Firebase
     var config = {
@@ -27,8 +22,8 @@ $(document).ready(function () {
 
 
     // initialize Fields for Datepicker JS
-    $("#startTrainDate").datepicker();  // this is to add a train
-    $("#updateTrainDate").datepicker();   // this is to update an existing train
+    $("#startTrainDate").datepicker({uiLibrary: 'bootstrap4'});  // this is to add a train
+    $("#updateTrainDate").datepicker({uiLibrary: 'bootstrap4'});  // this is to update an existing train
 
 
 

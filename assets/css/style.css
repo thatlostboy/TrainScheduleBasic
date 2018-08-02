@@ -32,3 +32,8 @@ tbody > .selectRow:hover {
     max-width: 120px;
     height: auto;
 }
+
+
+.mainbody {
+    margin-bottom: 300px;
+}
