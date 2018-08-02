@@ -19,17 +19,24 @@
     <div class="container">
 
         <div id="trainBanner" class="jumbotron">
-            <div class="container">
-                <h1 class="display-4">Anytime is Train Time</h1>
-                <p class="lead">Choo Choo Train.</p>
-                <p>Current Time:
-                    <strong id="currentTime"></strong>
-                </p>
+            <div class="container text-center">
+                <div class="row">
+                    <div class="col-lg-2 col-md-4">
+                        <img id="trainImg" src="assets/images/toytrain.png" alt="toy train">
+                    </div>
+                    <div class="col-lg-10 col-md-8">
+                        <h1 class="display-4">Anytime is Train Time</h1>
+                        <p class="lead">Choo Choo Train.</p>
+                        <p>Current Time:
+                            <strong id="currentTime"></strong>
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div id="trainScheduleCard" class="card">
-            <h5 class="card-header">Current Train Schedule</h5>
+            <h5 class="card-header bg-primary text-white">Current Train Schedule</h5>
             <div class="card-body">
                 <table id="trainSchedule" class="table">
                     <thead>
@@ -51,9 +58,9 @@
 
 
         <div id="addTrainCard" class="card">
-            <h5 class="card-header">Add Train</h5>
+            <h5 class="card-header bg-primary text-white">Add Train</h5>
             <div class="card-body">
-                    <input type="hidden" id="updateDBID" value="">
+                <input type="hidden" id="updateDBID" value="">
                 <div class="form-group">
                     <label for="trainName">Train Name</label>
                     <input type="text" class="form-control" id="trainName" aria-describedby="trainName" placeholder="Train Name">
@@ -123,6 +130,10 @@
         crossorigin="anonymous"></script>
     <!-- Firebase Reference -->
     <script src="https://www.gstatic.com/firebasejs/4.12.0/firebase.js"></script>
+
+    <!-- Firebase Authentication -->
+    <script src="https://cdn.firebase.com/libs/firebaseui/3.1.1/firebaseui.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.1.1/firebaseui.css" />
 
     <!-- Moment.js Reference -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
