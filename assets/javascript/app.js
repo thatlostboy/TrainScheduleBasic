@@ -1,7 +1,9 @@
 
 
 $(document).ready(function () {
-    console.log("ready!");
+
+
+
 
     // Initialize Firebase
     var config = {
@@ -22,31 +24,32 @@ $(document).ready(function () {
 
 
 
-    // click handler to open Modal to updating Train
+    // click handler to open bootstrap popup/Modal for updating Train
     $("body").on("click", ".editTrain", function () {
         let dbkey = $(this).attr("databaseid");
         console.log("open modal for: ", dbkey);
 
-        // load values from database
-        database.ref().on("value", function (snapshot) {
-            // load database
-            trainObj = snapshot.val();
+        // load values of object key from database and prefill modal form
+        database.ref(dbkey).on("value", function (snapshot) {
 
-            // load specific child
-            updateValObj = trainObj[dbkey];
-            console.log(updateValObj);
+            // load database
+            updateValObj = snapshot.val();
+            console.log("updateObj: ", updateValObj);
 
             // pretty display for trainStartTime, stored in epoch time (secs)
-            trainStartDisp = moment(updateValObj.trainStartDB, "HH:mm");
+            trainStartDisp = moment(updateValObj.trainStartDB, "X").format("HH:mm");
+            console.log(updateValObj.trainStartDB, trainStartDisp);
+
 
             // prepopulate values
             $("#updateDBID").val(dbkey);
             $("#updateName").val(updateValObj.trainNameDB);
             $("#updateDestn").val(updateValObj.trainDestnDB);
-            $("#updateStart").val(updateValObj.trainStartDisp);
+            $("#updateStart").val(trainStartDisp);
             $("#updateFrequency").val(updateValObj.trainFrequencyDB);
+            $("#updateTrainBTN").removeAttr("disabled");  // in case it was disabled before
 
-            // activate modal to s how
+            // activate modal to show
             $("#updateTrainPrompt").modal("show");
 
         }, function (errorObject) {
@@ -60,7 +63,8 @@ $(document).ready(function () {
     // click handler to update values
     $("body").on("click", "#updateTrainBTN", function () {
         // disable button
-        console.log("I got clicked!! ")
+        console.log("I got clicked!! ");
+        $("#updateTrainBTN").attr("disabled", "disabled");
 
         // grab text info
         var dbid = $("#updateDBID").val();
@@ -69,11 +73,23 @@ $(document).ready(function () {
         var updateStart = $("#updateStart").val();
         var updateFrequency = $("#updateFrequency").val();
 
-        console.log(dbid, updateName, updateDestn, updateStart, updateFrequency);
+        // convert date to Epoch format for storage
+        var updateStartEpoch = moment(updateStart, "HH:mm").format("X");
 
-        // update the values
+        // place values into Object
+        var updatedInfo = {
+            trainNameDB: updateName,
+            trainDestnDB: updateDestn,
+            trainStartDB: updateStartEpoch,
+            trainFrequencyDB: updateFrequency
+        }
+        console.log(dbid, updateName, updateDestn, updateStartEpoch, updateFrequency);
+
+        // update the values on database
+        database.ref(dbid).update(updatedInfo);
 
         // print success
+        console.log("where am I???????????????????????");
     });
 
 
@@ -146,7 +162,7 @@ $(document).ready(function () {
                 trainStartDB: start,
                 primKeyDB: primKey
             }
-
+            // update rows
             updateRows(newObject);
 
         }
@@ -210,7 +226,7 @@ $(document).ready(function () {
         var start = trainData.trainStartDB;
         var primKey = trainData.primKeyDB;
 
-        console.log("updateRows: ", trainData);
+        //console.log("updateRows: ", trainData);
         //////////////
         // fancy math stuff
         //////////////
@@ -238,13 +254,13 @@ $(document).ready(function () {
         var secsAway = parseInt(freq) * 60 - secsSoFar;
         var minsAway = parseInt(secsAway / 60);  // this will change from floating to integer
 
-        console.log("minutes away: ", minsAway);
+        //console.log("minutes away: ", minsAway);
 
         // Next Arrival = currentTime + seconds away
         var nextArrival = currentTime + secsAway;  // this is in epoch
 
 
-        console.log("Current Time: ", currentTime);
+        //console.log("Current Time: ", currentTime);
 
         // prettyup seconds using moment.js  
         var startTimeDisp = moment(start, "X").format("HH:mm");
