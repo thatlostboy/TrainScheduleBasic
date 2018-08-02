@@ -27,8 +27,8 @@ $(document).ready(function () {
 
 
     // initialize Fields for Datepicker JS
-    // $("#startTrainDate").datepicker();
-    // $("#updateTrainDate").datepicker();
+    $("#startTrainDate").datepicker();  // this is to add a train
+    $("#updateTrainDate").datepicker();   // this is to update an existing train
 
 
 
