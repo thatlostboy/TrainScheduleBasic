@@ -17,6 +17,7 @@ $(document).ready(function () {
     // Initialize instance of github provider object
     var provider = new firebase.auth.GithubAuthProvider();
 
+    /*
     // check if user is logged, if not, redirect to login page
     firebase.auth().onAuthStateChanged(function (user) {
         if (user) {
@@ -27,6 +28,7 @@ $(document).ready(function () {
             firebase.auth().signInWithRedirect(provider);
         }
     });
+    */
 
     // click handler to logout
     $("body").on("click", "#logoutBtn", function () {
