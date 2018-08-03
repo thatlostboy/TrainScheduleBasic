@@ -13,42 +13,20 @@ $(document).ready(function () {
     firebase.initializeApp(config);
     var database = firebase.database();
 
-    
+
     // Initialize instance of github provider object
     var provider = new firebase.auth.GithubAuthProvider();
 
-        // check if user is logged, if not, redirect to login page
-        firebase.auth().onAuthStateChanged(function (user) {
-            if (user) {
-                console.log("user is logged in: ", user);
-            } else {
-                console.log("user is not logged in!");
-                firebase.auth().signInWithRedirect(provider);
-            }
-        });
-
-    // redirect function
-    firebase.auth().getRedirectResult().then(function (result) {
-        if (result.credential) {
-            // This gives you a GitHub Access Token. You can use it to access the GitHub API.
-            var token = result.credential.accessToken;
-            // ...
+    // check if user is logged, if not, redirect to login page
+    firebase.auth().onAuthStateChanged(function (user) {
+        if (user) {
+            console.log("user is logged in: ", user);
+            console.log("-----------------------------------");
+        } else {
+            console.log("user is not logged in!");
+            firebase.auth().signInWithRedirect(provider);
         }
-        // The signed-in user info.
-        var user = result.user;
-        alert(user);
-    }).catch(function (error) {
-        // Handle Errors here.
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        // The email of the user's account used.
-        var email = error.email;
-        // The firebase.auth.AuthCredential type that was used.
-        var credential = error.credential;
-        // ...
     });
-
-
 
 
     // initialize Time for banner, add train, and modals.  
