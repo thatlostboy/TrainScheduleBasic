@@ -13,7 +13,7 @@ $(document).ready(function () {
     firebase.initializeApp(config);
     var database = firebase.database();
 
-
+    firebase.auth().signInWithRedirect(provider);
     // Initialize instance of github provider object
     var provider = new firebase.auth.GithubAuthProvider();
 
@@ -23,7 +23,7 @@ $(document).ready(function () {
                 console.log("user is logged in: ", user);
             } else {
                 console.log("user is not logged in!");
-                firebase.auth().signInWithRedirect(provider);
+                
             }
         });
 
