@@ -42,7 +42,7 @@ $(document).ready(function () {
         if (user) {
             console.log("user is logged in: ", user);
         } else {
-            conosle.log("user is not logged in!")
+            console.log("user is not logged in!")
         }
     });
 
