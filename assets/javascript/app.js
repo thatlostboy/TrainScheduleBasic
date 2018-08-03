@@ -14,6 +14,35 @@ $(document).ready(function () {
     var database = firebase.database();
 
 
+    // Initialize instance of github provider object
+    var provider = new firebase.auth.GithubAuthProvider();
+
+
+    // use redirect.  
+    firebase.auth().getRedirectResult().then(function (result) {
+        if (result.credential) {
+            // This gives you a GitHub Access Token. You can use it to access the GitHub API.
+            var token = result.credential.accessToken;
+            // ...
+        }
+        // The signed-in user info.
+        var user = result.user;
+    }).catch(function (error) {
+        // Handle Errors here.
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        // The email of the user's account used.
+        var email = error.email;
+        // The firebase.auth.AuthCredential type that was used.
+        var credential = error.credential;
+        // ...
+    });
+
+
+    // call redirect
+    firebase.auth().signInWithRedirect(provider);
+
+
     // initialize Time for banner, add train, and modals.  
     localTime = moment();
     $("#currentTime").text(localTime.format("MM/DD/YYYY hh:mm A"));
@@ -23,8 +52,8 @@ $(document).ready(function () {
 
     // initialize Fields for Datepicker library found on web
     // https://gijgo.com/datepicker/example/bootstrap-4
-    $("#startTrainDate").datepicker({uiLibrary: 'bootstrap4'});  // this is to add a train
-    $("#updateTrainDate").datepicker({uiLibrary: 'bootstrap4'});  // this is to update an existing train
+    $("#startTrainDate").datepicker({ uiLibrary: 'bootstrap4' });  // this is to add a train
+    $("#updateTrainDate").datepicker({ uiLibrary: 'bootstrap4' });  // this is to update an existing train
 
 
 
@@ -111,7 +140,7 @@ $(document).ready(function () {
         console.log("--------->success with updating!");
 
         // hide modal after 1 second of displaying success!
-        var temp = setTimeout(function(){
+        var temp = setTimeout(function () {
             $('#updateTrainPrompt').modal('hide');
             console.log("I tried to toggle!");
         }, 1000);
@@ -139,8 +168,12 @@ $(document).ready(function () {
         var dateTimeString = startTrainDate + " " + startTrainTime;
 
         // use moment to transform it to epoch Time (secs) for storage
-        var epochTime = moment(dateTimeString, "MM/DD/YYYY HH:mm").format("X");
+        var updateStartEpochObj = moment(dateTimeString, "MM/DD/YYYY HH:mm");
+        var updateStartEpoch = updateStartEpochObj.format("X");
         console.log("Any Luck?", dateTimeString, epochTime);
+
+        // basic input validations
+        console.log
 
 
         // update vaue to epochTime
