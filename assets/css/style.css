@@ -1,5 +1,6 @@
 #trainScheduleCard {
     margin-bottom: 30px;
+    margin-top: 5px;
 }
 
 #trainBanner {
@@ -33,7 +34,16 @@ tbody > .selectRow:hover {
     height: auto;
 }
 
+.addPadding {
+    padding-left: 10px;
+    padding-right: 10px;
+}
 
 .mainbody {
     margin-bottom: 300px;
+}
+
+#logoutBtn {
+    padding-left: 20px;
+    padding-right: 20px;
 }

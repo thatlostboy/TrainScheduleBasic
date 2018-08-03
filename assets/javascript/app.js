@@ -28,26 +28,14 @@ $(document).ready(function () {
         }
     });
 
-
-    // get redirect result
-    firebase.auth().getRedirectResult().then(function (result) {
-        if (result.credential) {
-            // This gives you a GitHub Access Token. You can use it to access the GitHub API.
-            var token = result.credential.accessToken;
-            // ...
-        }
-        // The signed-in user info.
-        var user = result.user;
-        console.log("redirectresults", user);
-    }).catch(function (error) {
-        // Handle Errors here.
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        // The email of the user's account used.
-        var email = error.email;
-        // The firebase.auth.AuthCredential type that was used.
-        var credential = error.credential;
-        // ...
+    // click handler to logout
+    $("body").on("click", "#logoutBtn", function () {
+        console.log("Did I click Logout?");
+        firebase.auth().signOut().then(function () {
+            console.log("Successful Logout");
+        }, function (error) {
+            console.log("Failed! ",error);
+        });
     });
 
 
@@ -62,6 +50,7 @@ $(document).ready(function () {
     // https://gijgo.com/datepicker/example/bootstrap-4
     $("#startTrainDate").datepicker({ uiLibrary: 'bootstrap4' });  // this is to add a train
     $("#updateTrainDate").datepicker({ uiLibrary: 'bootstrap4' });  // this is to update an existing train
+
 
 
 
