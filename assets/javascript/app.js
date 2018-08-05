@@ -169,14 +169,13 @@ $(document).ready(function () {
         // use moment to transform it to epoch Time (secs) for storage
         var updateStartEpochObj = moment(dateTimeString, "MM/DD/YYYY HH:mm");
         var updateStartEpoch = updateStartEpochObj.format("X");
-        console.log("Any Luck?", dateTimeString, epochTime);
+        console.log("Any Luck?", dateTimeString, updateStartEpoch);
 
         // basic input validations
-        console.log
 
 
         // update vaue to epochTime
-        newTrain['trainStartDB'] = epochTime;
+        newTrain['trainStartDB'] = updateStartEpoch;
 
         // log event
         console.log("recevied input: ", newTrain);
